@@ -5,7 +5,7 @@ from urllib.parse import urljoin
 import pandas as pd
 from pymongo import MongoClient
 from datetime import datetime
-from utils import generate_uid
+from utils import generate_uid, send_to_teams_webhook
 
 # Working for NorthHighland
 def north_highland_scrapper_function(url):
@@ -44,12 +44,12 @@ def north_highland_scrapper_function(url):
             print(f"Error: Failed to fetch URL {url}")
             return None
 
-    print(data)
+    # print(data)
     return data
 
 #Store North Highland Article in DB
 def store_north_highland_articles_in_db(north_highland_insight_scrape_data, collection):
-
+    count = 0
     for article in north_highland_insight_scrape_data:
         # Extract required information
         uid = generate_uid(prefix="AR")
@@ -68,7 +68,7 @@ def store_north_highland_articles_in_db(north_highland_insight_scrape_data, coll
         if existing_article:
             # Update last_checked field
             collection.update_one({"_id": existing_article["_id"]}, {"$set": {"last_checked": last_checked}})
-            print(f"Article '{article_title}' already exists. Last checked updated.")
+            # print(f"Article '{article_title}' already exists. Last checked updated.")
         else:
             # Insert new article
             article_data = {
@@ -84,7 +84,10 @@ def store_north_highland_articles_in_db(north_highland_insight_scrape_data, coll
                 "last_checked": last_checked
             }
             collection.insert_one(article_data)
-            print(f"New article '{article_title}' added to the collection.")
+            count+=1
+            send_to_teams_webhook('North Highland New Article: '+article_title+' added to the collection.')
 
     print("All North Highland Articles processed.")
-    return True
+    north_highland_msg = "North Highland Total New Articles Added: "+ str(count)
+    send_to_teams_webhook(north_highland_msg)
+    return "All North Highland Articles processed."

@@ -3,6 +3,7 @@
 # Imports
 from datetime import datetime
 from nanoid import generate
+import requests
 
 
 # Valid characters
@@ -40,3 +41,21 @@ def generate_uid(size=11, prefix="NL", year=True):
         uid = f"{prefix}-{random_txt}"
 
     return uid
+
+def send_to_teams_webhook(text):
+    webhook_url = "https://agrkspl.webhook.office.com/webhookb2/1b84cd4c-0d32-4220-9a4b-5315a75b76b9@ef6d8f52-9afa-48ef-8b83-bc822e9c656c/IncomingWebhook/4258b3d92808457daa11556be7b9fcca/9c644380-8921-43a0-b192-3644c7fbe1c7"
+
+    payload = {
+        "text": text
+    }
+
+    headers = {
+        "Content-Type": "application/json"
+    }
+
+    response = requests.post(webhook_url, json=payload, headers=headers)
+
+    if response.status_code == 200:
+        print("Log sent successfully to Microsoft Teams webhook!")
+    else:
+        print(f"Failed to send log to Microsoft Teams webhook. Status code: {response.status_code}")

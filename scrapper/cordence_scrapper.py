@@ -5,7 +5,7 @@ from urllib.parse import urljoin
 import pandas as pd
 from pymongo import MongoClient
 from datetime import datetime
-from utils import generate_uid
+from utils import generate_uid, send_to_teams_webhook
 
 # Cordence Scrapper
 def cordence_scrape_function(url):
@@ -40,7 +40,7 @@ def cordence_scrape_function(url):
     
 #Store Insight Article in DB
 def store_articles_in_db_insights(cordence_insight_scrape_data, collection):
-
+    count = 0
     for article in cordence_insight_scrape_data:
         # Extract required information
         uid = generate_uid(prefix="AR")
@@ -75,14 +75,18 @@ def store_articles_in_db_insights(cordence_insight_scrape_data, collection):
                 "last_checked": last_checked
             }
             collection.insert_one(article_data)
+            count += 1
+            send_to_teams_webhook('Cordence Insight New article: '+ article_title +' added to the collection.')
             # print(f"New article '{article_title}' added to the collection.")
 
     print("All Cordence Insights Articles processed.")
-    return True
+    insight_msg = "Cordence Insights Total New Articles Added: "+ str(count)
+    send_to_teams_webhook(insight_msg)
+    return "All Cordence Insights Articles processed."
 
 #Store Latest Article in DB
 def store_articles_in_db_latest(cordence_insight_scrape_data, collection):
-
+    count = 0
     for article in cordence_insight_scrape_data:
         # Extract required information
         uid = generate_uid(prefix="AR")
@@ -117,8 +121,12 @@ def store_articles_in_db_latest(cordence_insight_scrape_data, collection):
                 "last_checked": last_checked
             }
             collection.insert_one(article_data)
+            count += 1
+            send_to_teams_webhook('Cordence Latest New article: '+ article_title +'added to the collection.')
             # print(f"New article '{article_title}' added to the collection.")
 
-    print("All Cordence Insights Articles processed.")
-    return True
+    print("All Cordence Latest Articles processed.")
+    latest_msg = "Cordence Latest Total New Articles Added: "+ str(count)
+    send_to_teams_webhook(latest_msg)
+    return "All Cordence Latest Articles processed."
 
