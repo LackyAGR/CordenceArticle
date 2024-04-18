@@ -7,50 +7,54 @@ from pymongo import MongoClient
 from datetime import datetime
 from utils import generate_uid, send_to_teams_webhook
 
-def key_To_Way_Scrapper_Function(url):
+def elogroup_Scrape_Function(url):
+    data = []
     response = requests.get(url)
-
     if response.status_code == 200:
         soup = BeautifulSoup(response.content, 'html.parser')
+        content_elements = soup.find_all('div', class_='elementor-column elementor-col-100 elementor-inner-column elementor-element elementor-element-720e7b1')
+        
+        for content_element in content_elements:
+            title_element = content_element.find('h2', class_='elementor-heading-title elementor-size-default').find('a', class_='')
+            title = title_element.text.strip() if title_element else None
 
-        articles = soup.find_all('div', class_='sqs-block-content')
-        data = []
+            link_element = content_element.find('h2', class_='elementor-heading-title elementor-size-default').find('a')
+            link_url = urljoin(url, link_element['href']) if link_element else None
 
-        for article in articles:
-            title_elements = article.find_all(['p', 'div'], class_='sqs-dynamic-text')
-            title = ' '.join([elem.text.strip() for elem in title_elements]) if title_elements else None
-
-            url_elem = article.find('a', class_='image-inset')
-            if url_elem:
-                article_url = urljoin(url, url_elem['href'])
-            else:
-                article_url = None
+            # Extracting content of tags
+            tags = []
+            tag_elements = content_element.find_all('span', class_='elementor-post-info__terms-list-item')
+            for tag_element in tag_elements:
+                tags.append(tag_element.text.strip())
 
             data.append({
                 'title': title,
-                'url': article_url
+                'link_url': link_url,
+                'tags': tags
             })
 
-        return data
     else:
         print(f"Error: Failed to fetch URL {url}")
         return None
+    
+    return data
 
 
-#Store State Of Matter Article in DB
-def store_Key_To_Way_Articles_In_Db(key_To_Way_Scrape_Data, collection):
+#Store Elogroup Article in DB
+def store_Elogroup_Articles_In_Db(elogroup_Scrape_Data, collection):
     count = 0
     mes_str = ""
-    for article in key_To_Way_Scrape_Data:
-        if(article['title'] == None or article['url'] == None ):
+    for article in elogroup_Scrape_Data:
+        if(article['title'] == None or article['link_url'] == None ):
             pass
         # Extract required information
         uid = generate_uid(prefix="AR")
-        org_name = "Key To Way"
+        org_name = "Elogroup"
         article_category = ""
         article_subcategory = ""
         article_title = article['title']
-        article_url = article['url']
+        article_tags = article['tags']
+        article_url = article['link_url']
         article_content = ""
         article_language = "English"
         created_ts = datetime.now()
@@ -70,6 +74,7 @@ def store_Key_To_Way_Articles_In_Db(key_To_Way_Scrape_Data, collection):
                 "article_category": article_category,
                 "article_subcategory": article_subcategory,
                 "article_title": article_title,
+                "article_tags": article_tags,
                 "article_url": article_url,
                 "article_content": article_content,
                 "article_language": article_language,
@@ -78,10 +83,10 @@ def store_Key_To_Way_Articles_In_Db(key_To_Way_Scrape_Data, collection):
             }
             collection.insert_one(article_data)
             count+=1
-            # send_to_teams_webhook('Key To Way New Article: '+article_title+' added to the collection.')
+            # send_to_teams_webhook('Elogroup New Article: '+article_title+' added to the collection.')
             mes_str = mes_str + article_title + " || "
 
-    print("All Key To Way Articles processed.")
-    key_To_Way_msg = "Key To Way Total New Articles Added: "+ str(count) + "\n" + mes_str
-    # send_to_teams_webhook(key_To_Way_msg)
-    return "All Key To Way Articles processed."
+    print("All Elogroup Articles processed.")
+    elogroup_msg = "Elogroup Total New Articles Added:"+ str(count) + "\n" + mes_str
+    # send_to_teams_webhook(elogroup_msg)
+    return "All Elogroup Articles processed."

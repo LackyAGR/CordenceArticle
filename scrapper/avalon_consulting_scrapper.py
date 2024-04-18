@@ -7,7 +7,6 @@ from pymongo import MongoClient
 from datetime import datetime
 from utils import generate_uid, send_to_teams_webhook
 
-# working for all pages of Avlon cunsulting
 def avalon_Consulting_Scrapper_Function(urls):
     data = []
 
@@ -49,12 +48,12 @@ def avalon_Consulting_Scrapper_Function(urls):
     return data
 
 
-#Store State Of Matter Article in DB
+#Store Avalon Consulting Article in DB
 def store_Avalon_Consulting_Articles_In_Db(Avalon_Consulting_Scrape_Data, collection):
     count = 0
     mes_str = ""
     for article in Avalon_Consulting_Scrape_Data:
-        if(article['title'] == None or article['url'] == None ):
+        if(article['title'] == None or article['link_url'] == None ):
             pass
         # Extract required information
         uid = generate_uid(prefix="AR")
@@ -62,7 +61,6 @@ def store_Avalon_Consulting_Articles_In_Db(Avalon_Consulting_Scrape_Data, collec
         article_category = ""
         article_subcategory = ""
         article_title = article['title']
-        article_tags = ""
         article_url = article['link_url']
         article_content = ""
         article_language = "English"
@@ -91,7 +89,7 @@ def store_Avalon_Consulting_Articles_In_Db(Avalon_Consulting_Scrape_Data, collec
             }
             collection.insert_one(article_data)
             count+=1
-            # send_to_teams_webhook('Key To Way New Article: '+article_title+' added to the collection.')
+            # send_to_teams_webhook('Avalon Consulting New Article: '+article_title+' added to the collection.')
             mes_str = mes_str + article_title + " || "
 
     print("All Avalon Consulting Articles processed.")

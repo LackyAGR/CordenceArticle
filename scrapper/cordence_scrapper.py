@@ -41,6 +41,7 @@ def cordence_scrape_function(url):
 #Store Insight Article in DB
 def store_articles_in_db_insights(cordence_insight_scrape_data, collection):
     count = 0
+    mes_str = ""
     for article in cordence_insight_scrape_data:
         # Extract required information
         uid = generate_uid(prefix="AR")
@@ -76,17 +77,19 @@ def store_articles_in_db_insights(cordence_insight_scrape_data, collection):
             }
             collection.insert_one(article_data)
             count += 1
-            send_to_teams_webhook('Cordence Insight New article: '+ article_title +' added to the collection.')
+            # send_to_teams_webhook('Cordence Insight New article: '+ article_title +' added to the collection.')
             # print(f"New article '{article_title}' added to the collection.")
+            mes_str = mes_str + article_title + " || "
 
     print("All Cordence Insights Articles processed.")
-    insight_msg = "Cordence Insights Total New Articles Added: "+ str(count)
-    send_to_teams_webhook(insight_msg)
+    insight_msg = "Cordence Insights Total New Articles Added: "+ str(count) + "\n" + mes_str
+    # send_to_teams_webhook(insight_msg)
     return "All Cordence Insights Articles processed."
 
 #Store Latest Article in DB
 def store_articles_in_db_latest(cordence_insight_scrape_data, collection):
     count = 0
+    mes_str = ""
     for article in cordence_insight_scrape_data:
         if(article['title'] == None or article['url'] == None ):
             pass
@@ -126,9 +129,10 @@ def store_articles_in_db_latest(cordence_insight_scrape_data, collection):
             count += 1
             # send_to_teams_webhook('Cordence Latest New article: '+ article_title +'added to the collection.')
             # print(f"New article '{article_title}' added to the collection.")
+            mes_str = mes_str + article_title + " || "
 
     print("All Cordence Latest Articles processed.")
-    latest_msg = "Cordence Latest Total New Articles Added: "+ str(count)
+    latest_msg = "Cordence Latest Total New Articles Added: "+ str(count) + "\n" + mes_str
     # send_to_teams_webhook(latest_msg)
     return "All Cordence Latest Articles processed."
 

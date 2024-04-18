@@ -50,8 +50,9 @@ def state_Of_Matter_Scrapper_Function(url):
 #Store State Of Matter Article in DB
 def store_State_Of_Matter_Articles_In_Db(state_Of_Matter_Scrape_Data, collection):
     count = 0
+    mes_str = ""
     for article in state_Of_Matter_Scrape_Data:
-        if(article['title'] == None or article['url'] == None ):
+        if(article['title'] == None or article['link'] == None ):
             pass
         # Extract required information
         uid = generate_uid(prefix="AR")
@@ -80,6 +81,7 @@ def store_State_Of_Matter_Articles_In_Db(state_Of_Matter_Scrape_Data, collection
                 "article_category": article_category,
                 "article_subcategory": article_subcategory,
                 "article_title": article_title,
+                "article_tags": article_tags,
                 "article_url": article_url,
                 "article_content": article_content,
                 "article_language": article_language,
@@ -89,8 +91,9 @@ def store_State_Of_Matter_Articles_In_Db(state_Of_Matter_Scrape_Data, collection
             collection.insert_one(article_data)
             count+=1
             # send_to_teams_webhook('State Of Matter New Article: '+article_title+' added to the collection.')
+            mes_str = mes_str + article_title + " || "
 
     print("All State Of Matter Articles processed.")
-    state_of_matter_msg = "State Of Matter Total New Articles Added: "+ str(count)
+    state_of_matter_msg = "State Of Matter Total New Articles Added: "+ str(count) + "\n" + mes_str
     # send_to_teams_webhook(state_of_matter_msg)
-    return "All North Highland Articles processed."
+    return "All State of Matter Articles processed."
