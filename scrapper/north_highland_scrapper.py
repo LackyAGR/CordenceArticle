@@ -50,7 +50,10 @@ def north_highland_scrapper_function(url):
 #Store North Highland Article in DB
 def store_north_highland_articles_in_db(north_highland_insight_scrape_data, collection):
     count = 0
+    mes_str = ""
     for article in north_highland_insight_scrape_data:
+        if(article['title'] == None or article['url'] == None ):
+            pass
         # Extract required information
         uid = generate_uid(prefix="AR")
         org_name = "North Highland"
@@ -85,9 +88,10 @@ def store_north_highland_articles_in_db(north_highland_insight_scrape_data, coll
             }
             collection.insert_one(article_data)
             count+=1
-            send_to_teams_webhook('North Highland New Article: '+article_title+' added to the collection.')
+            # send_to_teams_webhook('North Highland New Article: '+article_title+' added to the collection.')
+            mes_str = mes_str + article_title + " || "
 
     print("All North Highland Articles processed.")
-    north_highland_msg = "North Highland Total New Articles Added: "+ str(count)
-    send_to_teams_webhook(north_highland_msg)
+    north_highland_msg = "North Highland Total New Articles Added: "+ str(count) + "\n" + mes_str
+    # send_to_teams_webhook(north_highland_msg)
     return "All North Highland Articles processed."
